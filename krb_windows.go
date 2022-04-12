@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package krb
+package gopgkrb5
 
 import (
 	"github.com/alexbrainman/sspi"

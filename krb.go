@@ -1,4 +1,4 @@
-package krb
+package gopgkrb5
 
 import (
 	"net"
