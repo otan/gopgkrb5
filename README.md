@@ -21,7 +21,7 @@ import (
 )
 
 func init() {
-  pgconn.RegisterGSSProvider(func() (pgconn.GSS, error) { return krb.NewGSS() })
+  pgconn.RegisterGSSProvider(func() (pgconn.GSS, error) { return gopgkrb5.NewGSS() })
 }
 ```
 
