@@ -25,5 +25,5 @@ func init() {
 }
 ```
 
-All dependencies of [`pgconn`](https://github.com/jackc/pgconn), e.g. [`pgx`](https://github.com/jackc/pgx) will now be able to authenticate with
+All dependencies of [`jackc/pgconn`](https://github.com/jackc/pgconn), e.g. [`jackc/pgx`](https://github.com/jackc/pgx) will now be able to authenticate with
 GSSAPI/krb5.
