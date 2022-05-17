@@ -18,6 +18,8 @@ import (
 /*
  * UNIX Kerberos support, using jcmturner's pure-go
  * implementation
+ *
+ * Keytab support is available only on unix systems
  */
 
 // GSS implements the pq.GSS interface.
@@ -73,7 +75,8 @@ func (g *GSS) init() error {
 
 	var cl *client.Client
 
-	// If we have keytab set
+	// If we have keytab path set, we create client from keytab
+	// Otherwise, we use ccache file
 	if g.ktPath != "" {
 		kt, err := keytab.Load(g.ktPath)
 		if err != nil {
