@@ -22,7 +22,7 @@ import (
  * Keytab support is available only on unix systems
  */
 
-// GSS implements the pq.GSS interface.
+// GSS implements the pq.GSS interface and the pgconn.GSS interface.
 type GSS struct {
 	cli    *client.Client
 	ktPath string
@@ -127,7 +127,7 @@ func (g *GSS) GetInitToken(host string, service string) ([]byte, error) {
 	return g.GetInitTokenFromSPN(spn)
 }
 
-// GetInitTokenFromSpn implements the GSS interface.
+// GetInitTokenFromSPN implements the GSS interface.
 func (g *GSS) GetInitTokenFromSPN(spn string) ([]byte, error) {
 	s := spnego.SPNEGOClient(g.cli, spn)
 
@@ -142,6 +142,11 @@ func (g *GSS) GetInitTokenFromSPN(spn string) ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+// GetInitTokenFromSpn implements the GSS interface.
+func (g *GSS) GetInitTokenFromSpn(spn string) ([]byte, error) {
+	return g.GetInitTokenFromSPN(spn)
 }
 
 // Continue implements the GSS interface.
