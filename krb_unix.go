@@ -26,8 +26,9 @@ import (
 type GSS struct {
 	cli    *client.Client
 	ktPath string
-	realm  string
-	spn    string
+	realm    string
+	username string
+	password string
 }
 
 // NewGSS creates a new GSS provider.
@@ -42,10 +43,25 @@ func NewGSS() (*GSS, error) {
 	return g, nil
 }
 
-func NewGSSWithKeytab(spn string, realm string, ktPath string) (*GSS, error) {
+func NewGSSWithKeytab(username string, realm string, ktPath string) (*GSS, error) {
 	g := &GSS{}
 	g.ktPath = ktPath
-	g.spn = spn
+	g.username = username
+	g.realm = realm
+
+	err := g.init()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return g, nil
+}
+
+func NewGSSWithPassword(username string, realm string, password string) (*GSS, error) {
+	g := &GSS{}
+	g.password = password
+	g.username = username
 	g.realm = realm
 
 	err := g.init()
@@ -76,14 +92,17 @@ func (g *GSS) init() error {
 	var cl *client.Client
 
 	// If we have keytab path set, we create client from keytab
+	// Or if we have password set, we log in by password
 	// Otherwise, we use ccache file
 	if g.ktPath != "" {
 		kt, err := keytab.Load(g.ktPath)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
-		cl = client.NewWithKeytab(g.spn, g.realm, kt, cfg)
+		cl = client.NewWithKeytab(g.username, g.realm, kt, cfg)
+	} else if g.password != "" {
+		cl = client.NewWithPassword(g.username, g.realm, g.password, cfg)
 	} else {
 		ccpath := "/tmp/krb5cc_" + u.Uid
 
