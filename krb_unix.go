@@ -29,11 +29,13 @@ type GSS struct {
 	realm    string
 	username string
 	password string
+	settings []func(settings *client.Settings)
 }
 
 // NewGSS creates a new GSS provider.
-func NewGSS() (*GSS, error) {
+func NewGSS(settings ...func(*client.Settings)) (*GSS, error) {
 	g := &GSS{}
+	g.settings = settings
 	err := g.init()
 
 	if err != nil {
@@ -43,11 +45,12 @@ func NewGSS() (*GSS, error) {
 	return g, nil
 }
 
-func NewGSSWithKeytab(username string, realm string, ktPath string) (*GSS, error) {
+func NewGSSWithKeytab(username string, realm string, ktPath string, settings ...func(settings *client.Settings)) (*GSS, error) {
 	g := &GSS{}
 	g.ktPath = ktPath
 	g.username = username
 	g.realm = realm
+	g.settings = settings
 
 	err := g.init()
 
@@ -58,11 +61,12 @@ func NewGSSWithKeytab(username string, realm string, ktPath string) (*GSS, error
 	return g, nil
 }
 
-func NewGSSWithPassword(username string, realm string, password string) (*GSS, error) {
+func NewGSSWithPassword(username string, realm string, password string, settings ...func(settings *client.Settings)) (*GSS, error) {
 	g := &GSS{}
 	g.password = password
 	g.username = username
 	g.realm = realm
+	g.settings = settings
 
 	err := g.init()
 
@@ -91,6 +95,13 @@ func (g *GSS) init() error {
 
 	var cl *client.Client
 
+	// By default, we disable encryption match check
+	// Settings can be overwritten when creating GSS provider instance
+	settings := []func(settings *client.Settings){client.DisablePAFXFAST(true)}
+	if len(g.settings) != 0 {
+		settings = g.settings
+	}
+
 	// If we have keytab path set, we create client from keytab
 	// Or if we have password set, we log in by password
 	// Otherwise, we use ccache file
@@ -100,9 +111,9 @@ func (g *GSS) init() error {
 			return err
 		}
 
-		cl = client.NewWithKeytab(g.username, g.realm, kt, cfg)
+		cl = client.NewWithKeytab(g.username, g.realm, kt, cfg, settings...)
 	} else if g.password != "" {
-		cl = client.NewWithPassword(g.username, g.realm, g.password, cfg)
+		cl = client.NewWithPassword(g.username, g.realm, g.password, cfg, settings...)
 	} else {
 		ccpath := "/tmp/krb5cc_" + u.Uid
 
@@ -116,7 +127,7 @@ func (g *GSS) init() error {
 			return err
 		}
 
-		cl, err = client.NewFromCCache(ccache, cfg, client.DisablePAFXFAST(true))
+		cl, err = client.NewFromCCache(ccache, cfg, settings...)
 		if err != nil {
 			return err
 		}
