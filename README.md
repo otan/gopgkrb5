@@ -25,5 +25,23 @@ func init() {
 }
 ```
 
+You can also use keytab to log in:
+```go
+func init() {
+  pgconn.RegisterGSSProvider(func() (pgconn.GSS, error) {
+	  return gopgkrb5.NewGSSWithKeytab("username", "DOMAIN.LOCAL", "/test.keytab")
+  })
+}
+```
+
+or password:
+```go
+func init() {
+  pgconn.RegisterGSSProvider(func() (pgconn.GSS, error) {
+	  return gopgkrb5.NewGSSWithPassword("username", "DOMAIN.LOCAL", "password")
+  })
+}
+```
+
 All dependencies of [`jackc/pgconn`](https://github.com/jackc/pgconn), e.g. [`jackc/pgx`](https://github.com/jackc/pgx) will now be able to authenticate with
 GSSAPI/krb5.
