@@ -25,6 +25,24 @@ func init() {
 }
 ```
 
+### Unix only features
+
+Optional settings are available:
+
+```
+
+```go
+import (
+ "github.com/jcmturner/gokrb5/v8/client"
+ "github.com/jackc/pgconn"
+ "github.com/otan/gopgkrb5"
+)
+
+func init() {
+  pgconn.RegisterGSSProvider(func() (pgconn.GSS, error) { return gopgkrb5.NewGSS(client.NewSettings(...)) })
+}
+```
+
 You can also use keytab to log in:
 ```go
 func init() {
