@@ -29,8 +29,6 @@ func init() {
 
 Optional settings are available:
 
-```
-
 ```go
 import (
  "github.com/jcmturner/gokrb5/v8/client"
